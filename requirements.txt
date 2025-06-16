@@ -7,3 +7,4 @@ chromadb
 faiss-cpu
 firebase-admin
 langchain_google_genai
+langchain-community
