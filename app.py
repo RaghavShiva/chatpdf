@@ -3,7 +3,7 @@ from PyPDF2 import PdfReader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 import os
 
-import json
+import json, base64
 from firebase_admin import credentials
 from langchain_google_genai import GoogleGenerativeAIEmbeddings
 import google.generativeai as genai
@@ -15,11 +15,14 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Get JSON string from env and create a temporary JSON file
-service_account_info = json.loads(os.getenv("SERVICE_ACCOUNT_JSON"))
-with open("service_account_temp.json", "w") as f:
-    json.dump(service_account_info, f)
-
-os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "service_account_temp.json"
+encoded = os.environ.get("SERVICE_ACCOUNT_BASE64")
+if encoded:
+    decoded = base64.b64decode(encoded).decode("utf-8")
+    with open("service_account_temp.json", "w") as f:
+        f.write(decoded)
+    os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "service_account_temp.json"
+else:
+    raise ValueError("Missing Firebase service account")
 
 os.getenv("GEMINI_API_KEY")
 genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
